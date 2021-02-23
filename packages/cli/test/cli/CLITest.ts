@@ -150,24 +150,6 @@ describe('CLI', function () {
     strictEqual(await readFile(processed, 'utf8'), '1;')
   })
 
-  it('ignores .d.ts files', async function () {
-    const ignored = await createTemporaryFile(
-      'a-dir/ignored.d.ts',
-      'export = 42;'
-    )
-    const { status, stdout, stderr } = await runCodemodCLI([dirname(ignored)])
-
-    deepEqual(
-      { status, stdout, stderr },
-      {
-        status: 0,
-        stdout: `0 file(s), 0 modified, 0 errors\n`,
-        stderr: '',
-      }
-    )
-    strictEqual(await readFile(ignored, 'utf8'), 'export = 42;')
-  })
-
   it('processes files but does not replace their contents when using --dry', async function () {
     const afile = await createTemporaryFile('a-file.js', '3 + 4;')
     const { status, stdout, stderr } = await runCodemodCLI([
