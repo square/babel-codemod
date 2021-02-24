@@ -1,6 +1,6 @@
 import { deepEqual, ok, strictEqual } from 'assert'
 import * as fs from 'fs'
-import { dirname, join } from 'path'
+import { dirname, join, resolve as pathResolve } from 'path'
 import { sync as rimraf } from 'rimraf'
 import { valid } from 'semver'
 import { inspect, promisify } from 'util'
@@ -61,6 +61,22 @@ describe('CLI', function () {
       stderr.includes('I am a bad plugin'),
       `stderr should include "I am a bad plugin", got: ${stderr}`
     )
+  })
+
+  it('respects globs', async function () {
+    const pathInFixtures = (dirPath: string): string =>
+      pathResolve(__dirname, '..', 'fixtures', 'glob-test', dirPath)
+    const { status, stdout, stderr } = await runCodemodCLI([
+      '--dry',
+      pathInFixtures('**/*.js'),
+      `!${pathInFixtures('omit.js')}`,
+    ])
+
+    strictEqual(status, 0)
+    strictEqual(stdout.includes('abc.js'), true)
+    strictEqual(stdout.includes('subdir/def.js'), true)
+    strictEqual(stdout.includes('omit.js'), false)
+    strictEqual(stderr, '')
   })
 
   it('can read from stdin and write to stdout given the --stdio flag', async function () {
