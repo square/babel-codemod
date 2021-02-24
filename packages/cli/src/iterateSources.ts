@@ -9,12 +9,12 @@ import { Source } from './TransformRunner'
  */
 export default function iterateSources(
   paths: Array<string>,
-  extensions: Set<string> = new Set(),
+  extensions: Set<string> | null = null,
   sys: System = RealSystem
 ): Array<Source> {
   return sync(paths, {
     gitignore: true,
   })
-    .filter((file) => extensions.has(extname(file)))
+    .filter((file) => !extensions || extensions.has(extname(file)))
     .map((file) => new Source(file, sys.readFile(file, 'utf8')))
 }
