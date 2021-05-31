@@ -3,14 +3,12 @@ import { ParserOptions } from '@codemod/parser'
 import { basename, extname } from 'path'
 import { install } from 'source-map-support'
 import { TransformableExtensions } from './extensions'
-import { PathPredicate } from './iterateSources'
 import PluginLoader from './PluginLoader'
 import AstExplorerResolver from './resolvers/AstExplorerResolver'
 import FileSystemResolver from './resolvers/FileSystemResolver'
 import NetworkResolver from './resolvers/NetworkResolver'
 import PackageResolver from './resolvers/PackageResolver'
 import { disable, enable } from './transpile-requires'
-import { EntryType } from './System'
 
 export class Plugin {
   readonly declaredName?: string
@@ -33,22 +31,6 @@ export class Plugin {
   }
 }
 
-function defaultIgnorePredicate(
-  path: string,
-  basename: string,
-  root: string,
-  type: EntryType
-): boolean {
-  return (
-    // ignore paths starting with a dot
-    basename.startsWith('.') ||
-    // ignore TypeScript declaration files
-    (basename.endsWith('.d.ts') && type === EntryType.File) ||
-    // ignore node_modules directories
-    (basename === 'node_modules' && type === EntryType.Directory)
-  )
-}
-
 export enum Printer {
   Recast = 'recast',
   Prettier = 'prettier',
@@ -67,7 +49,6 @@ export default class Config {
     readonly requires: Array<string> = [],
     readonly transpilePlugins: boolean = true,
     readonly findBabelConfig: boolean = false,
-    readonly ignore: PathPredicate = defaultIgnorePredicate,
     readonly stdio: boolean = false,
     readonly dry: boolean = false
   ) {}
@@ -198,7 +179,6 @@ export class ConfigBuilder {
   private _requires?: Array<string>
   private _transpilePlugins?: boolean
   private _findBabelConfig?: boolean
-  private _ignore?: PathPredicate
   private _stdio?: boolean
   private _dry?: boolean
 
@@ -307,11 +287,6 @@ export class ConfigBuilder {
     return this
   }
 
-  ignore(value: PathPredicate): this {
-    this._ignore = value
-    return this
-  }
-
   stdio(value: boolean): this {
     this._stdio = value
     return this
@@ -334,7 +309,6 @@ export class ConfigBuilder {
       this._requires,
       this._transpilePlugins,
       this._findBabelConfig,
-      this._ignore,
       this._stdio,
       this._dry
     )

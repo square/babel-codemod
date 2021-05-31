@@ -177,11 +177,7 @@ export default class Options {
           if (arg[0] === '-') {
             throw new Error(`unexpected option: ${arg}`)
           } else {
-            if (hasGlob(arg)) {
-              config.addSourcePaths(...globSync(arg))
-            } else {
-              config.addSourcePath(arg)
-            }
+            config.addSourcePath(arg)
           }
           break
       }
